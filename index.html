@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soundcloud Farm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111;
+      --surface2: #1a1a1a;
+      --border: rgba(255,255,255,0.08);
+      --accent: #ff5500;
+      --accent-dim: rgba(255,85,0,0.15);
+      --text: #f0ede8;
+      --muted: rgba(240,237,232,0.45);
+      --mono: 'DM Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1rem 4rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon svg { width: 18px; height: 18px; fill: white; }
+
+    h1 {
+      font-family: var(--mono);
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    .tagline {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+      font-weight: 300;
+      letter-spacing: 0.04em;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      width: 100%;
+      max-width: 640px;
+    }
+
+    .url-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .url-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .url-input:focus { border-color: var(--accent); }
+    .url-input::placeholder { color: var(--muted); }
+
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem 1.25rem;
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    .btn:hover { opacity: 0.88; }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.2); }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+    .player-frame {
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat {
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 1rem 0.75rem;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-value {
+      font-family: var(--mono);
+      font-size: 2rem;
+      font-weight: 500;
+      line-height: 1;
+      color: var(--accent);
+    }
+
+    .stat-value.neutral { color: var(--text); }
+
+    .stat-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    .interval-input {
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 2rem;
+      font-weight: 500;
+      width: 60px;
+      text-align: center;
+      outline: none;
+      -moz-appearance: textfield;
+    }
+
+    .interval-input::-webkit-outer-spin-button,
+    .interval-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-main {
+      flex: 2;
+      padding: 0.9rem;
+      font-size: 0.9rem;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-sm {
+      flex: 1;
+      padding: 0.9rem;
+      font-size: 0.85rem;
+      border-radius: 10px;
+    }
+
+    .status {
+      margin-top: 1rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+      font-family: var(--mono);
+      min-height: 18px;
+    }
+
+    .progress-bar {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 1s linear;
+    }
+
+    footer {
+      margin-top: 2.5rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/>
+        </svg>
+      </div>
+      <h1>Soundcloud Farm</h1>
+    </div>
+    <p class="tagline">Venga dame reproducciones</p>
+  </header>
+
+  <div class="card">
+
+    <div class="url-row">
+      <input class="url-input" type="text" id="scUrl"
+        placeholder="https://soundcloud.com/artist/sets/playlist"
+        value="https://soundcloud.com/soundcloud-playlists/sets/ambient-mixes" />
+      <button class="btn" onclick="loadPlayer()">Load</button>
+    </div>
+
+    <div class="player-frame">
+      <iframe id="scWidget"
+        src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/soundcloud-playlists/sets/ambient-mixes&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true"
+        width="100%" height="180" frameborder="0" scrolling="no" allow="autoplay"></iframe>
+    </div>
+
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Next track in</div>
+        <div class="stat-value" id="countdown">--</div>
+        <div class="stat-sub">seconds</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Track</div>
+        <div class="stat-value neutral" id="trackNum">--</div>
+        <div class="stat-sub" id="trackTotal">of --</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Interval</div>
+        <input class="interval-input" type="number" id="intervalInput" value="45" min="5" max="600" onchange="updateInterval()" />
+        <div class="stat-sub">seconds</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-main" id="btnPlayPause" onclick="togglePlayPause()">
+        <span id="btnIcon">▶</span> Start
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="skipNow()" id="btnSkip" disabled>⏭ Skip</button>
+      <button class="btn btn-ghost btn-sm" onclick="resetAgent()">↺ Reset</button>
+    </div>
+
+    <div class="status" id="statusBar">Paste a SoundCloud playlist URL and click Load</div>
+
+  </div>
+
+  <footer>
+    Built with the <a href="https://developers.soundcloud.com/docs/api/html5-widget" target="_blank">SoundCloud Widget API</a><br>
+    Paste any public SoundCloud playlist or set URL to get started
+  </footer>
+
+  <script src="https://w.soundcloud.com/player/api.js"></script>
+  <script>
+    let widget = null;
+    let timer = null;
+    let countdownTimer = null;
+    let secondsLeft = 45;
+    let intervalSecs = 45;
+    let isRunning = false;
+    let trackIndex = 0;
+    let trackCount = 0;
+
+    function initWidget(iframe) {
+      if (!window.SC) { setTimeout(() => initWidget(iframe), 800); return; }
+      widget = SC.Widget(iframe);
+      widget.bind(SC.Widget.Events.READY, () => {
+        widget.getSounds(sounds => {
+          trackCount = sounds.length;
+          setStatus('Ready — ' + trackCount + ' track' + (trackCount !== 1 ? 's' : '') + ' loaded. Hit Start!');
+          document.getElementById('trackTotal').textContent = 'of ' + trackCount;
+          updateTrackNum(1);
+        });
+      });
+      widget.bind(SC.Widget.Events.PLAY, () => {
+        widget.getCurrentSoundIndex(i => { trackIndex = i; updateTrackNum(i + 1); });
+      });
+    }
+
+    function loadPlayer() {
+      const url = document.getElementById('scUrl').value.trim();
+      if (!url) return;
+      resetAgent();
+      const encoded = encodeURIComponent(url);
+      const iframe = document.getElementById('scWidget');
+      iframe.src = 'https://w.soundcloud.com/player/?url=' + encoded + '&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true';
+      iframe.onload = () => setTimeout(() => initWidget(iframe), 600);
+      setStatus('Loading playlist…');
+    }
+
+    function setStatus(msg) { document.getElementById('statusBar').textContent = msg; }
+    function updateTrackNum(n) { document.getElementById('trackNum').textContent = n; }
+
+    function updateInterval() {
+      const v = parseInt(document.getElementById('intervalInput').value, 10);
+      if (v >= 5) { intervalSecs = v; if (isRunning) secondsLeft = intervalSecs; }
+    }
+
+    function togglePlayPause() {
+      if (!widget) { initWidget(document.getElementById('scWidget')); setTimeout(togglePlayPause, 900); return; }
+      if (isRunning) { pauseAgent(); } else { startAgent(); }
+    }
+
+    function startAgent() {
+      isRunning = true;
+      secondsLeft = intervalSecs;
+      document.getElementById('btnPlayPause').innerHTML = '<span>⏸</span> Pause';
+      document.getElementById('btnSkip').disabled = false;
+      widget.play();
+      setStatus('Auto-switching every ' + intervalSecs + 's — sit back and enjoy');
+      runCountdown();
+      timer = setInterval(nextTrack, intervalSecs * 1000);
+    }
+
+    function pauseAgent() {
+      isRunning = false;
+      clearInterval(timer);
+      clearInterval(countdownTimer);
+      document.getElementById('btnPlayPause').innerHTML = '<span>▶</span> Resume';
+      document.getElementById('btnSkip').disabled = true;
+      document.getElementById('countdown').textContent = '--';
+      document.getElementById('progressFill').style.width = '0%';
+      if (widget) widget.pause();
+      setStatus('Paused.');
+    }
+
+    function runCountdown() {
+      clearInterval(countdownTimer);
+      secondsLeft = intervalSecs;
+      document.getElementById('countdown').textContent = secondsLeft;
+      updateProgress();
+      countdownTimer = setInterval(() => {
+        secondsLeft = Math.max(0, secondsLeft - 1);
+        document.getElementById('countdown').textContent = secondsLeft;
+        updateProgress();
+      }, 1000);
+    }
+
+    function updateProgress() {
+      const pct = ((intervalSecs - secondsLeft) / intervalSecs) * 100;
+      document.getElementById('progressFill').style.width = Math.min(100, pct) + '%';
+    }
+
+    function nextTrack() {
+      if (!widget) return;
+      widget.getSounds(sounds => {
+        trackCount = sounds.length;
+        document.getElementById('trackTotal').textContent = 'of ' + trackCount;
+        trackIndex = (trackIndex + 1) % trackCount;
+        widget.skip(trackIndex);
+        widget.play();
+        updateTrackNum(trackIndex + 1);
+        secondsLeft = intervalSecs;
+        setStatus('Switched to track ' + (trackIndex + 1) + ' of ' + trackCount);
+      });
+    }
+
+    function skipNow() {
+      if (!isRunning) return;
+      clearInterval(timer);
+      nextTrack();
+      runCountdown();
+      timer = setInterval(nextTrack, intervalSecs * 1000);
+    }
+
+    function resetAgent() {
+      clearInterval(timer);
+      clearInterval(countdownTimer);
+      isRunning = false;
+      trackIndex = 0;
+      secondsLeft = intervalSecs;
+      document.getElementById('btnPlayPause').innerHTML = '<span>▶</span> Start';
+      document.getElementById('btnSkip').disabled = true;
+      document.getElementById('countdown').textContent = '--';
+      document.getElementById('trackNum').textContent = '--';
+      document.getElementById('trackTotal').textContent = 'of --';
+      document.getElementById('progressFill').style.width = '0%';
+      setStatus('Paste a SoundCloud playlist URL and click Load');
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(() => initWidget(document.getElementById('scWidget')), 800);
+    });
+  </script>
+
+</body>
+</html>
