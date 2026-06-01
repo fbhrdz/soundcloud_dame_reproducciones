@@ -372,9 +372,8 @@
       document.getElementById('btnPlayPause').innerHTML = '<span>⏸</span> Pause';
       document.getElementById('btnSkip').disabled = false;
       widget.play();
-      setStatus('Auto-switching every ' + intervalSecs + 's — sit back and enjoy');
-      runCountdown();
-      timer = setInterval(nextTrack, intervalSecs * 1000);
+      setStatus('Auto-switching — intervals vary between 40–60s');
+      scheduleNext();
     }
 
     function pauseAgent() {
@@ -406,6 +405,18 @@
       document.getElementById('progressFill').style.width = Math.min(100, pct) + '%';
     }
 
+    function randomInterval() {
+      return Math.floor(Math.random() * 21) + 40;
+    }
+
+    function scheduleNext() {
+      clearInterval(timer);
+      intervalSecs = randomInterval();
+      document.getElementById('intervalInput').value = intervalSecs;
+      runCountdown();
+      timer = setInterval(() => { nextTrack(); scheduleNext(); }, intervalSecs * 1000);
+    }
+
     function nextTrack() {
       if (!widget) return;
       widget.getSounds(sounds => {
@@ -415,8 +426,7 @@
         widget.skip(trackIndex);
         widget.play();
         updateTrackNum(trackIndex + 1);
-        secondsLeft = intervalSecs;
-        setStatus('Switched to track ' + (trackIndex + 1) + ' of ' + trackCount);
+        setStatus('Switched to track ' + (trackIndex + 1) + ' of ' + trackCount + ' — next in ' + intervalSecs + 's');
       });
     }
 
@@ -424,8 +434,7 @@
       if (!isRunning) return;
       clearInterval(timer);
       nextTrack();
-      runCountdown();
-      timer = setInterval(nextTrack, intervalSecs * 1000);
+      scheduleNext();
     }
 
     function resetAgent() {
